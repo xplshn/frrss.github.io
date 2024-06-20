@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2024, xplshn
+Copyright (c) 2024, [Jade Mandelbrot+ (Jade Assist)](https://hf.co/chat/assistant/6671f1e4f3898f7f798d3f53) and [xplshn](https://fatbuffalo.neocities.com/def)
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
