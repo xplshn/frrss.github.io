@@ -61,7 +61,7 @@
       }
 
       function fetchArticleContent(url) {
-          const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+          const corsProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
           fetch(corsProxyUrl, { redirect: 'follow' })
            .then(response => response.text())
            .then(html => {
