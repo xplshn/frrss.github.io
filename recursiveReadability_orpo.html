@@ -61,7 +61,7 @@
       }
 
       function fetchArticleContent(url) {
-          const corsProxyUrl = 'https://cors-proxy.htmldriven.com/?url=' + encodeURIComponent(url);
+          const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
           fetch(corsProxyUrl, { redirect: 'follow' })
            .then(response => response.text())
            .then(html => {
