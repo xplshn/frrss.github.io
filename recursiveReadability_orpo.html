@@ -61,21 +61,21 @@
       }
 
       function fetchArticleContent(url) {
-        const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-        fetch(corsProxyUrl)
-          .then(response => response.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const baseElement = doc.createElement('base');
-            baseElement.setAttribute('href', url); // Set base URL for resolving relative links
-            doc.head.appendChild(baseElement);
-            const article = new Readability(doc).parse();
-            displayArticleInModal(url, article);
-          })
-          .catch(error => {
-            console.error('Error fetching article:', error);
-          });
+          const corsProxyUrl = 'https://cors-proxy.htmldriven.com/?url=' + encodeURIComponent(url);
+          fetch(corsProxyUrl, { redirect: 'follow' })
+           .then(response => response.text())
+           .then(html => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              const baseElement = doc.createElement('base');
+              baseElement.setAttribute('href', url); // Set base URL for resolving relative links
+              doc.head.appendChild(baseElement);
+              const article = new Readability(doc).parse();
+              displayArticleInModal(url, article);
+            })
+           .catch(error => {
+              console.error('Error fetching article:', error);
+            });
       }
       
       function displayArticleInModal(url, article) {
