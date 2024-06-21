@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recursive Readability with CORSPROXY</title>
+    <script src="https://unpkg.com/@mozilla/readability/Readability.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #fff;
+      }
+
+      .modal-content {
+        background-color: #333;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        height: 90%;
+        overflow: auto;
+      }
+
+      .back-arrow {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Recursive Readability with CORSPROXY</h1>
+    <label for="url-input">Enter URL:</label>
+    <input type="text" id="url-input" style="width: 80%;" />
+    <button onclick="fetchAndDisplay()">Fetch and Display</button>
+    <div id="modals-container"></div>
+    <script>
+      const modalsContainer = document.getElementById('modals-container');
+      let modalStack = [];
+
+      function fetchAndDisplay() {
+        const url = document.getElementById('url-input').value.trim();
+        if (!url) return;
+        fetchArticleContent(url);
+      }
+
+      function fetchArticleContent(url) {
+        const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        fetch(corsProxyUrl)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const baseElement = doc.createElement('base');
+            baseElement.setAttribute('href', url); // Set base URL for resolving relative links
+            doc.head.appendChild(baseElement);
+            const article = new Readability(doc).parse();
+            displayArticleInModal(url, article);
+          })
+          .catch(error => {
+            console.error('Error fetching article:', error);
+          });
+      }
+      
+      function displayArticleInModal(url, article) {
+        const modal = createModal();
+        const modalContent = modal.querySelector('.modal-content');
+        
+        const backButton = document.createElement('span');
+        backButton.innerHTML = '&larr; Go Back';
+        backButton.className = 'back-arrow';
+        backButton.onclick = function() {
+          closeModal();
+          if (modalStack.length > 1) {
+            modalStack.pop();
+            const previousModal = modalStack[modalStack.length - 1];
+            previousModal.style.display = 'block';
+          }
+        };
+        modalContent.appendChild(backButton);
+        
+        const articleTitle = document.createElement('h2');
+        articleTitle.textContent = article.title;
+        modalContent.appendChild(articleTitle);
+        
+        const articleContent = document.createElement('div');
+        articleContent.innerHTML = article.content;
+        modalContent.appendChild(articleContent);
+        
+        modalsContainer.appendChild(modal);
+        modal.style.display = 'block';
+        modalStack.push(modal);
+        interceptAllLinks(modal, url); // Pass article URL to intercept links correctly
+      }
+      
+      function interceptAllLinks(container, baseUrl) {
+        container.querySelectorAll('a[href]').forEach(element => {
+          element.addEventListener('click', function(event) {
+            event.preventDefault();
+            const href = element.getAttribute('href');
+            let url;
+            try {
+              url = new URL(href, baseUrl).href;
+            } catch (e) {
+              url = href;
+            }
+            fetchArticleContentUsingProxy(url);
+          });
+        });
+      }
+
+      function fetchArticleContentUsingProxy(url) {
+        const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        fetchArticleContent(corsProxyUrl);
+      }
+
+      function createModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+        modal.appendChild(modalContent);
+        return modal;
+      }
+
+      function closeModal() {
+        const modal = modalStack.pop();
+        if (modal) {
+          modal.style.display = 'none';
+          modal.remove();
+        }
+      }
+      window.onclick = function(event) {
+        const modal = document.querySelector('.modal');
+        if (event.target === modal) {
+          closeModal();
+        }
+      };
+    </script>
+  </body>
+</html>
