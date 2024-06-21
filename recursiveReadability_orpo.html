@@ -120,14 +120,9 @@
             } catch (e) {
               url = href;
             }
-            fetchArticleContentUsingProxy(url);
+            fetchArticleContent(url);
           });
         });
-      }
-
-      function fetchArticleContentUsingProxy(url) {
-        const corsProxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-        fetchArticleContent(corsProxyUrl);
       }
 
       function createModal() {
