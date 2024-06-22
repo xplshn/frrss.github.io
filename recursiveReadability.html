@@ -97,9 +97,8 @@
         backButton.innerHTML = '&larr; Go Back';
         backButton.className = 'back-arrow';
         backButton.onclick = function() {
-          closeModal();
-          if (modalStack.length > 1) {
-            modalStack.pop();
+          closeModal(index);
+          if (modalStack.length > 0) {
             const previousModal = modalStack[modalStack.length - 1];
             previousModal.style.display = 'block';
           }
@@ -147,25 +146,27 @@
         return modal;
       }
 
-      function closeModal() {
+      function closeModal(index) {
         const modal = modalStack.pop();
         if (modal) {
           modal.style.display = 'none';
           modal.remove();
         }
+        removeUrlParameter(index);
       }
 
       window.onclick = function(event) {
         const modal = document.querySelector('.modal');
         if (event.target === modal) {
-          closeModal();
+          const index = modalStack.length;
+          closeModal(index);
         }
       };
 
       function updateUrlParameter(index, url) {
         const params = new URLSearchParams(window.location.search);
         params.set(`w${index}URL`, url);
-        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        window.history.pushState({ index: index }, '', `${window.location.pathname}?${params.toString()}`);
       }
 
       function removeUrlParameter(index) {
